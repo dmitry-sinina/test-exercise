@@ -14,6 +14,57 @@
     group: root
     mode: "0755"
 
+- name: Validate podman_firewall_driver
+  ansible.builtin.assert:
+    that: podman_firewall_driver in ['', 'nftables', 'iptables', 'none']
+    fail_msg: >-
+      podman_firewall_driver must be '', 'nftables', 'iptables' or 'none',
+      got '{{ podman_firewall_driver }}'
+    quiet: true
+
+- name: Ensure containers.conf drop-in directory exists
+  ansible.builtin.file:
+    path: "{{ podman_firewall_conf | dirname }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  when: podman_firewall_driver | length > 0
+
+- name: Configure netavark firewall driver
+  ansible.builtin.copy:
+    dest: "{{ podman_firewall_conf }}"
+    content: |
+      # Managed by Ansible (roles/podman), do not edit
+      [network]
+      firewall_driver = "{{ podman_firewall_driver }}"
+    owner: root
+    group: root
+    mode: "0644"
+  when: podman_firewall_driver | length > 0
+
+- name: Remove netavark firewall driver override
+  ansible.builtin.file:
+    path: "{{ podman_firewall_conf }}"
+    state: absent
+  when: podman_firewall_driver | length == 0
+
+# netavark does not clean up after itself when switched to "none", so drop
+# the nftables table left by earlier bridge/PublishPort containers
+- name: Check for leftover netavark nftables table
+  ansible.builtin.command: nft list table inet netavark
+  register: podman_nft_table
+  changed_when: false
+  failed_when: false
+  when: podman_firewall_driver == 'none'
+
+- name: Remove leftover netavark nftables table
+  ansible.builtin.command: nft delete table inet netavark
+  changed_when: true
+  when:
+    - podman_firewall_driver == 'none'
+    - podman_nft_table.rc == 0
+
 - name: Get podman version
   ansible.builtin.command: podman --version
   register: podman_version
