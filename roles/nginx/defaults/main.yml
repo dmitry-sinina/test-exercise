@@ -1,0 +1,29 @@
+---
+# present: deploy service; absent: remove service, files and image
+nginx_state: present
+
+# Public image, pinned to a specific stable release
+nginx_image: docker.io/library/nginx:1.30.5-alpine
+
+# Quadlet unit / container name (systemd service: <name>.service)
+nginx_service_name: nginx-app
+
+# Host port published to container port 80
+nginx_host_port: 8080
+
+# Text served on /
+nginx_content: "Hello from nginx managed by Ansible + Podman Quadlet"
+
+# Host directory holding rendered config and content (bind-mounted read-only)
+nginx_data_dir: /srv/{{ nginx_service_name }}
+
+# Health check
+nginx_health_interval: 10s
+nginx_health_timeout: 3s
+nginx_health_retries: 3
+nginx_health_start_period: 5s
+
+# Remove the image on nginx_state=absent
+nginx_remove_image: true
+
+nginx_quadlet_dir: /etc/containers/systemd

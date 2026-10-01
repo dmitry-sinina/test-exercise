@@ -1,0 +1,47 @@
+---
+- name: Check for Quadlet unit
+  ansible.builtin.stat:
+    path: "{{ nginx_quadlet_dir }}/{{ nginx_service_name }}.container"
+  register: nginx_unit
+
+- name: Stop nginx service
+  ansible.builtin.systemd_service:
+    name: "{{ nginx_service_name }}.service"
+    state: stopped
+  when: nginx_unit.stat.exists
+
+- name: Remove Quadlet unit
+  ansible.builtin.file:
+    path: "{{ nginx_quadlet_dir }}/{{ nginx_service_name }}.container"
+    state: absent
+  register: nginx_unit_removed
+
+- name: Reload systemd
+  ansible.builtin.systemd_service:
+    daemon_reload: true
+  when: nginx_unit_removed is changed
+
+- name: Check whether podman is installed
+  ansible.builtin.command: which podman
+  register: nginx_podman_bin
+  changed_when: false
+  failed_when: false
+
+- name: Remove leftover container
+  ansible.builtin.command: podman rm --force --ignore {{ nginx_service_name }}
+  register: nginx_rm
+  changed_when: nginx_rm.stdout | length > 0
+  when: nginx_podman_bin.rc == 0
+
+- name: Remove image
+  ansible.builtin.command: podman rmi --ignore {{ nginx_image }}
+  register: nginx_rmi
+  changed_when: nginx_rmi.stdout | length > 0
+  when:
+    - nginx_podman_bin.rc == 0
+    - nginx_remove_image | bool
+
+- name: Remove data directory
+  ansible.builtin.file:
+    path: "{{ nginx_data_dir }}"
+    state: absent

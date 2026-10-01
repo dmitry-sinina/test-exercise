@@ -1,0 +1,72 @@
+---
+- name: Check that podman is installed
+  ansible.builtin.command: which podman
+  register: nginx_podman_bin
+  changed_when: false
+  failed_when: nginx_podman_bin.rc != 0
+
+- name: Create data directories
+  ansible.builtin.file:
+    path: "{{ nginx_data_dir }}/{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  loop:
+    - html
+    - conf.d
+
+- name: Render nginx config
+  ansible.builtin.template:
+    src: default.conf.j2
+    dest: "{{ nginx_data_dir }}/conf.d/default.conf"
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Restart nginx
+
+- name: Render content
+  ansible.builtin.template:
+    src: index.html.j2
+    dest: "{{ nginx_data_dir }}/html/index.html"
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Restart nginx
+
+- name: Render Quadlet unit
+  ansible.builtin.template:
+    src: nginx-app.container.j2
+    dest: "{{ nginx_quadlet_dir }}/{{ nginx_service_name }}.container"
+    owner: root
+    group: root
+    mode: "0644"
+  notify:
+    - Reload systemd
+    - Restart nginx
+
+- name: Apply pending changes
+  ansible.builtin.meta: flush_handlers
+
+- name: Ensure nginx service is started
+  ansible.builtin.systemd_service:
+    name: "{{ nginx_service_name }}.service"
+    state: started
+    daemon_reload: true
+
+- name: Wait for HTTP content on port {{ nginx_host_port }}
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ nginx_host_port }}/"
+    return_content: true
+  register: nginx_http
+  until: nginx_http.status == 200 and nginx_content in nginx_http.content
+  retries: 30
+  delay: 2
+
+- name: Wait for container health check to pass
+  ansible.builtin.command: podman healthcheck run {{ nginx_service_name }}
+  register: nginx_health
+  until: nginx_health.rc == 0
+  retries: 15
+  delay: 2
+  changed_when: false
