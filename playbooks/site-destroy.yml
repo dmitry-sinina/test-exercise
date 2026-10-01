@@ -1,0 +1,8 @@
+---
+- name: Remove Podman and everything installed by host preparation
+  hosts: all
+  become: true
+  vars:
+    podman_state: absent
+  roles:
+    - role: podman
