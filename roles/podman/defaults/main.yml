@@ -13,3 +13,10 @@ podman_purge_data: true
 podman_data_paths:
   - /var/lib/containers
   - /etc/containers/systemd
+
+# netavark firewall driver: "" (netavark picks), "nftables", "iptables" or
+# "none". "none" means podman installs no firewall rules: PublishPort and
+# outbound NAT for bridge networks stop working, so containers must use
+# Network=host (or you manage the firewall yourself).
+podman_firewall_driver: "none"
+podman_firewall_conf: /etc/containers/containers.conf.d/50-firewall.conf

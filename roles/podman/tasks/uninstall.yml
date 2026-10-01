@@ -31,6 +31,11 @@
     - podman_bin.rc == 0
   changed_when: true
 
+- name: Remove netavark firewall driver override
+  ansible.builtin.file:
+    path: "{{ podman_firewall_conf }}"
+    state: absent
+
 - name: Purge podman packages and their auto-installed dependencies
   ansible.builtin.apt:
     name: "{{ podman_packages }}"
