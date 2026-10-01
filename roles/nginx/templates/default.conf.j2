@@ -1,6 +1,6 @@
 # {{ ansible_managed }}
 server {
-    listen       80;
+    listen       {{ nginx_host_port }};
     server_name  _;
     server_tokens off;
 

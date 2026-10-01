@@ -8,7 +8,7 @@ nginx_image: docker.io/library/nginx:1.30.5-alpine
 # Quadlet unit / container name (systemd service: <name>.service)
 nginx_service_name: nginx-app
 
-# Host port published to container port 80
+# Host port nginx listens on (container uses host networking)
 nginx_host_port: 8080
 
 # Text served on /
