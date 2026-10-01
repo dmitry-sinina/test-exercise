@@ -1,4 +1,23 @@
 ---
+- name: Find deployed Quadlet units
+  ansible.builtin.find:
+    paths: /etc/containers/systemd
+    patterns:
+      - "*.container"
+      - "*.pod"
+      - "*.kube"
+      - "*.network"
+      - "*.volume"
+  register: podman_quadlets
+
+- name: Refuse to uninstall while Quadlet services are deployed
+  ansible.builtin.assert:
+    that: podman_quadlets.matched == 0
+    fail_msg: >-
+      Quadlet units still deployed: {{ podman_quadlets.files | map(attribute='path') | join(', ') }}.
+      Remove services first (e.g. playbooks/nginx-destroy.yml).
+    quiet: true
+
 - name: Check whether podman is installed
   ansible.builtin.command: which podman
   register: podman_bin

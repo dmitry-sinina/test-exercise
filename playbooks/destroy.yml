@@ -1,9 +1,0 @@
----
-- name: Destroy containerized service and host preparation
-  hosts: all
-  become: true
-  vars:
-    # Override with -e podman_state=present to keep podman installed
-    podman_state: absent
-  roles:
-    - role: podman

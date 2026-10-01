@@ -1,5 +1,5 @@
 ---
-- name: Deploy containerized service
+- name: Prepare host to run Podman Quadlet services
   hosts: all
   become: true
   roles:
