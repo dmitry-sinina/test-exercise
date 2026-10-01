@@ -1,0 +1,24 @@
+---
+- name: Install podman packages
+  ansible.builtin.apt:
+    name: "{{ podman_packages }}"
+    state: present
+    update_cache: true
+    cache_valid_time: 3600
+
+- name: Ensure Quadlet system directory exists
+  ansible.builtin.file:
+    path: /etc/containers/systemd
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Get podman version
+  ansible.builtin.command: podman --version
+  register: podman_version
+  changed_when: false
+
+- name: Show podman version
+  ansible.builtin.debug:
+    msg: "{{ podman_version.stdout }}"

@@ -1,0 +1,6 @@
+---
+- name: Deploy containerized service
+  hosts: all
+  become: true
+  roles:
+    - role: podman

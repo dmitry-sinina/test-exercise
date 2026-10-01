@@ -1,0 +1,15 @@
+---
+# present: install podman; absent: uninstall everything this role installed
+podman_state: present
+
+# Packages installed by this role (dependencies are pulled in by apt and
+# removed again via autoremove on uninstall)
+podman_packages:
+  - podman
+
+# On uninstall also delete container storage and Quadlet directory
+# (images, containers, volumes created by podman)
+podman_purge_data: true
+podman_data_paths:
+  - /var/lib/containers
+  - /etc/containers/systemd

@@ -1,0 +1,14 @@
+---
+- name: Validate podman_state
+  ansible.builtin.assert:
+    that: podman_state in ['present', 'absent']
+    fail_msg: "podman_state must be 'present' or 'absent', got '{{ podman_state }}'"
+    quiet: true
+
+- name: Install podman
+  ansible.builtin.include_tasks: install.yml
+  when: podman_state == 'present'
+
+- name: Uninstall podman
+  ansible.builtin.include_tasks: uninstall.yml
+  when: podman_state == 'absent'

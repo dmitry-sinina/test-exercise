@@ -1,0 +1,12 @@
+---
+galaxy_info:
+  role_name: podman
+  author: dmitry.s
+  description: Install / uninstall Podman so the host can run Quadlet services
+  license: MIT
+  min_ansible_version: "2.15"
+  platforms:
+    - name: Debian
+      versions:
+        - trixie
+dependencies: []
