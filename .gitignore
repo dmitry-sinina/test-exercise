@@ -1,0 +1,22 @@
+# Ansible
+*.retry
+.ansible/
+.vault_pass*
+*.vault
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Editors / OS
+.idea/
+.vscode/
+*.swp
+.DS_Store
+
+# Logs
+*.log
+
+# Requirements document
+exercise.md
