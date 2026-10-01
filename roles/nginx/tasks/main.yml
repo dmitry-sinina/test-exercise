@@ -1,0 +1,14 @@
+---
+- name: Validate nginx_state
+  ansible.builtin.assert:
+    that: nginx_state in ['present', 'absent']
+    fail_msg: "nginx_state must be 'present' or 'absent', got '{{ nginx_state }}'"
+    quiet: true
+
+- name: Deploy nginx
+  ansible.builtin.include_tasks: present.yml
+  when: nginx_state == 'present'
+
+- name: Remove nginx
+  ansible.builtin.include_tasks: absent.yml
+  when: nginx_state == 'absent'

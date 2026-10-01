@@ -1,0 +1,8 @@
+---
+- name: Remove nginx service
+  hosts: all
+  become: true
+  vars:
+    nginx_state: absent
+  roles:
+    - role: nginx

@@ -1,0 +1,25 @@
+# {{ ansible_managed }}
+[Unit]
+Description=nginx service {{ nginx_service_name }} (Podman Quadlet)
+
+[Container]
+ContainerName={{ nginx_service_name }}
+Image={{ nginx_image }}
+Pull=missing
+Network=host
+Volume={{ nginx_data_dir }}/html:/usr/share/nginx/html:ro,Z
+Volume={{ nginx_data_dir }}/conf.d:/etc/nginx/conf.d:ro,Z
+HealthCmd=curl -fsS -o /dev/null http://127.0.0.1:{{ nginx_host_port }}/healthz
+HealthInterval={{ nginx_health_interval }}
+HealthTimeout={{ nginx_health_timeout }}
+HealthRetries={{ nginx_health_retries }}
+HealthStartPeriod={{ nginx_health_start_period }}
+HealthOnFailure=kill
+
+[Service]
+Restart=always
+RestartSec=5
+TimeoutStartSec=300
+
+[Install]
+WantedBy=multi-user.target
